@@ -79,6 +79,35 @@ tot_gdp_by_continent <- gapminder |>
 
 View(tot_gdp_by_continent)
 
+#IQR is a thing, could be used better than this
+iqr_2007 <- gapminder |> 
+  filter(year == 2007) |> 
+  summarise(IQR(pop))
+View(iqr_2007)
 
+###
 
+# Some useful things
+gapminder |> 
+  filter(year == 2007) |> 
+  count(continent, sort = TRUE)
+
+gapminder |> 
+  summarise(n())
+
+gapminder |> 
+  group_by(continent) |> 
+  summarise(se_le = sd(lifeExp)/sqrt(n()))
+
+## Mutating stuff (this is a nonsense example...)
+gdp_pop_continent_year <- gapminder |> 
+  filter(year == 2007) |> 
+  mutate(gdpperbillion = gdpPercap*pop/10^9) |> 
+  group_by(continent, year) |> 
+  summarise(mean_gdppercap = mean(gdpPercap),
+            sd_gdp_per_cap = sd(gdpPercap),
+            sd_pop = sd(pop),
+            mean_gdp_billion = mean(gdpperbillion),
+            sd_gdp_billion = sd(gdpperbillion))
+View(gdp_pop_continent_year)
 
