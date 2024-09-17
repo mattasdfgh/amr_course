@@ -20,11 +20,26 @@ tidy_gdp <- year_country_gdppercap |> rename(gdp_per_capita = gdpPercap)
 head(tidy_gdp)
 
 
-# 
+# What is the annual GDP per capita for Europe
+year_country_gdppercap_europe <- gapminder |> 
+  filter(continent == "Europe") |> 
+  select(year, country, gdpPercap)
+
+head(year_country_gdppercap_europe)  
+
+life_exp_europe_2007 <- gapminder |> 
+  filter(continent == "Europe", year == 2007) |> 
+  select(country, lifeExp)
+
+View(life_exp_europe_2007)
 
 
+# Challenge
+africa_subset_life_exp <- gapminder |> 
+  filter(continent == "Africa") |> 
+  select(country, year, lifeExp)
 
-
+View(africa_subset_life_exp)
 
 
 
