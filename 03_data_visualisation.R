@@ -24,9 +24,31 @@ ggplot(gapminder, aes(year, lifeExp)) +
 ggplot(gapminder[gapminder$country=="United Kingdom", ], aes(year, lifeExp)) +
   geom_point()
 
-# There are some other things we can do here, some of which give terrible results
+# There are some other things we can do here, some of which give terrible results (e.g. line)
 ggplot(gapminder, aes(year, lifeExp)) +
   geom_line()
+
+ggplot(gapminder, aes(year, lifeExp)) +
+  geom_line(aes(color = continent))
+
+ggplot(gapminder, aes(year, lifeExp)) +
+  geom_line(aes(color = continent, group = country))
+
+ggplot(gapminder, aes(year, lifeExp)) +
+  geom_line(aes(color = continent, group = country)) +
+  geom_point()
+
+ggplot(gapminder, aes(year, lifeExp)) +
+  geom_point() +
+  geom_line(aes(color = continent, group = country))
+
+# Note that changing the order of the layers makes a difference. 
+
+
+
+  
+
+
 
 
 
