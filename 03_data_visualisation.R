@@ -74,6 +74,12 @@ ggplot(gapminder, aes(gdpPercap, lifeExp)) +
   geom_point(alpha = 0.1, mapping = aes(color = continent)) +
   scale_x_log10()
 
+# Add a trend line
+ggplot(gapminder, aes(gdpPercap, lifeExp)) +
+  geom_point(alpha = 0.1, mapping = aes(color = continent)) +
+  scale_x_log10() + 
+  geom_smooth(method = "lm", alpha = 0.2, color = "black")
 
+# alpha does not work for the above in geom_smooth, no idea why...
 
 
