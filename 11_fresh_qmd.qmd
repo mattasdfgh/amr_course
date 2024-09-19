@@ -1,0 +1,23 @@
+---
+title: "Playing around with qmd files"
+format: html
+editor: visual
+---
+
+## Writing in Markdown
+
+**Bold**
+
+*Italic*
+
+Not bold or italic
+
+***Bold and italic***
+
+A little list:
+
+-   a bullet
+-   b bullet
+-   c bullet
+
+
