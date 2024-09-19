@@ -16,8 +16,9 @@ ggsave("results/life_expectancy_by_continent.png", cont_plot, width = 6, height 
 ggsave("results/life_expectancy_by_continent.pdf", cont_plot, width = 6, height = 4)
 
 
-
-
+## Exporting data (write.csv exports row numbers as column 1 as default)
+gap_australia <- gapminder[gapminder$country == "Australia", ]
+write.csv(gap_australia, "processing/full_australia.csv")
 
 
 
