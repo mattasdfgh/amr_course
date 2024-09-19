@@ -1,0 +1,23 @@
+# A few more things
+
+## Firstly, set up viewer mode by going to the settings drop down and select preview in viewer mode. This could be useful sometimes but also prevents rendering to browser. Html file will save to folder either way. Even when using viewer mode, it will only show in viewer panel when rendered.
+
+## A bit more functionality including using the here package.
+
+```{r}
+gap <- read.csv("data/gapminder_data.csv")
+head(gap)
+```
+
+```{r}
+here::here("data/")
+here::dr_here()
+```
+
+```{r}
+#| include: false
+mean_lifeExp <- mean(gap$lifeExp)
+```
+
+The mean life expectancy is `r mean_lifeExp`.
+

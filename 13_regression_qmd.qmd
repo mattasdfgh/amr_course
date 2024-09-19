@@ -1,0 +1,86 @@
+# Linear regression using IMD data
+
+## Load packages, data, etc.
+
+```{r libraries}
+#| message: false
+#| warning: false
+library(tidyverse)
+```
+
+```{r load data}
+london_data <- read.csv("data/English_IMD_2019_Domains_rebased_London_by_CDRC.csv")
+
+head(london_data)
+glimpse(london_data)
+```
+
+
+## Simple linear regression
+
+Looking at the relationship between health index and the living environment.
+These variables are `health_london_rank` and `livinEnv_london_rank`.
+
+```{r plot 1}
+plot1 <- ggplot(london_data, aes(health_london_rank, livingEnv_london_rank)) +
+         geom_point()
+plot1
+```
+
+
+```{r}
+livenv_health_model <- lm(health_london_rank ~ livingEnv_london_rank, data = london_data)
+summary(livenv_health_model)
+```
+
+```{r}
+livenv_health_model$coefficients
+livenv_health_model$coefficients["livingEnv_london_rank"]
+summary(livenv_health_model$coefficients)
+```
+
+
+One unit increase in living environment rank is associated with a `r livenv_health_model$coefficients["livingEnv_london_rank"]` points increase in health deprivation and disability rank. 
+
+The $p$ value for this association is `r summary(livenv_health_model)$coefficients["livingEnv_london_rank", "Pr(>|t|)"]`.
+
+
+## Log transformation
+
+```{r}
+livenv_logmodel <- lm(
+  health_london_rank ~ log(livingEnv_london_rank),
+  data = london_data
+)
+livenv_logmodel
+summary(livenv_logmodel)
+```
+
+
+## Have a look at this. Note that geom_smooth can use all of the lm methods without all the work first. This just means that we won't have access to them.
+
+```{r}
+health_rank_pred <- fitted(livenv_logmodel)
+health_rank_pred <- as.data.frame(health_rank_pred)
+
+health_rank_pred$residuals <- residuals(livenv_logmodel)
+health_rank_pred$livenv_rank <- london_data$livingEnv_london_rank
+health_rank_pred$health_rank_raw <- london_data$health_london_rank
+
+head(health_rank_pred)
+
+plot1 <- ggplot(health_rank_pred, aes(log(livenv_rank), health_rank_raw)) +
+  geom_point(alpha = 0.3) +
+  #geom_line(aes(log(livenv_rank), health_rank_pred), color = "blue")
+  geom_smooth(method = "lm")
+
+```
+
+
+
+
+
+
+
+
+
