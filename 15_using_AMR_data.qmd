@@ -1,0 +1,120 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+# Session with AMR data
+
+```{r}
+library(tidyverse)
+library(broom)
+```
+
+
+```{r}
+amr <- read.csv("data/dig_health_hub_amr.csv")
+head(amr)
+str(amr)
+```
+
+### Note that dates are character variables.
+
+```{r}
+table(amr$organism)
+```
+
+```{r}
+sapply(amr, class)
+sapply(amr, table)
+```
+
+
+## Calculate age in years
+
+```{r}
+amr <- amr |> 
+  mutate(
+    age_years_sd = (dob %--% spec_date) %/% years(1)
+  )
+
+# This code calculates the difference between 2 dates, without first converting the variables to numeric. They are characters but we are still doing this. 
+```
+
+
+```{r}
+amr <- amr |> 
+  mutate(
+    spec_date_YMD = as.Date(amr$spec_date)
+  )
+
+
+```
+
+
+```{r}
+age_hist <- amr |> 
+  ggplot(aes(age_years_sd)) +
+  geom_histogram(bins = 10, color = "white") +
+  theme_minimal(base_size = 14, base_family = "sans") +
+  labs(x = "Age", y = "Count")
+
+age_hist
+```
+
+
+```{r}
+xtabs(~region, data = amr)
+xtabs(~organism, data = amr)
+```
+
+
+```{r}
+amr_xtab <- xtabs(~ coamox + cipro + gentam, data = amr)
+amr_xtab
+View(amr_xtab)
+
+amr_xtab <- as.data.frame(amr_xtab)
+amr_xtab$proportion <- amr_xtab$Freq / sum(amr_xtab$Freq)
+```
+
+
+```{r}
+#logit model
+coamox_logi <- glm(coamox ~ age_years_sd + sex_male, data = amr,
+                   family = "binomial")
+
+summary(coamox_logi)
+
+## Check VIF (??)
+car::vif(coamox_logi)
+
+logit.use <- log(coamox_logi$fitted.values / (1 - coamox_logi$fitted.values))
+logit.use
+
+## Now let's see if resistance odds differ by age
+
+linearity.data <- data.frame(logit.use, age = coamox_logi$model$age_years_sd)
+linearity.data
+
+## Create a plot with linear and actual relationship
+linear_plot <- linearity.data |> 
+  ggplot(aes(age, logit.use)) +
+  geom_point(aes(size = "Observation"), color = "blue", alpha = 0.6) +
+  geom_smooth(se = FALSE, aes(color = "Loess curve")) +
+  geom_smooth(method = lm, se = FALSE, aes(color = "linear")) +
+  labs(x = "Age", y = "Log odds of resistance to coamoxiclav")
+
+linear_plot
+
+```
+
+
+```{r}
+# Challenge
+chal_mod <- 
+```
+
+
+
+
+

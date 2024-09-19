@@ -1,3 +1,8 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
 # Linear regression using IMD data
 
 ## Load packages, data, etc.
@@ -77,6 +82,80 @@ plot1 <- ggplot(health_rank_pred, aes(log(livenv_rank), health_rank_raw)) +
 ```
 
 
+
+## Robust regression
+
+```{r}
+library(sandwich)
+library(olsrr)
+library(lmtest)
+```
+
+
+```{r}
+livenv_health_model$robse <- vcovHC(livenv_health_model, type = "HC1")
+coeftest(livenv_health_model, livenv_health_model$robse)
+
+```
+
+
+```{r}
+ols_test_normality(livenv_health_model)
+```
+
+
+```{r}
+#Residual vs. fitted values
+ols_plot_resid_fit(livenv_health_model)
+ols_plot_resid_hist(livenv_health_model)
+```
+
+
+## Broom
+
+```{r}
+summary(livenv_health_model)
+library(broom)
+```
+
+
+```{r}
+tidytable <- tidy(livenv_health_model)
+tidytable
+
+tidytable[2,"p.value"]
+```
+
+
+```{r}
+augment(livenv_health_model)
+```
+
+```{r}
+glance(livenv_health_model)
+```
+
+
+```{r}
+london_data <- london_data |> 
+  mutate(city = la19nm == "City of London")
+
+glm_city_income <- glm(city ~ Income_london_rank,
+                     london_data, family = "binomial")
+
+summary(glm_city_income)
+
+```
+
+
+```{r}
+glm_tidytable <- tidy(glm_city_income)
+glm_tidytable
+
+augment(glm_city_income)
+glance(glm_city_income)
+
+```
 
 
 

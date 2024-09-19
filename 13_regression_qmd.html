@@ -250,6 +250,240 @@ F-statistic: 320.8 on 1 and 4833 DF,  p-value: &lt; 2.2e-16</code></pre>
 <p>One unit increase in living environment rank is associated with a 0.3430437 points increase in health deprivation and disability rank.</p>
 <p>The <span class="math inline">\(p\)</span> value for this association is 1.6256997^{-69}.</p>
 </section>
+<section id="log-transformation" class="level2">
+<h2 class="anchored" data-anchor-id="log-transformation">Log transformation</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>livenv_logmodel <span class="ot">&lt;-</span> <span class="fu">lm</span>(</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  health_london_rank <span class="sc">~</span> <span class="fu">log</span>(livingEnv_london_rank),</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> london_data</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>livenv_logmodel</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = health_london_rank ~ log(livingEnv_london_rank), 
+    data = london_data)
+
+Coefficients:
+               (Intercept)  log(livingEnv_london_rank)  
+                      4220                        1800  </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(livenv_logmodel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = health_london_rank ~ log(livingEnv_london_rank), 
+    data = london_data)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-18977.5  -6159.4    569.8   6581.5  19468.8 
+
+Coefficients:
+                           Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)                  4220.1     1265.9   3.334 0.000863 ***
+log(livingEnv_london_rank)   1799.8      139.5  12.897  &lt; 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 7742 on 4833 degrees of freedom
+Multiple R-squared:  0.03327,   Adjusted R-squared:  0.03307 
+F-statistic: 166.3 on 1 and 4833 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+</section>
+<section id="have-a-look-at-this.-note-that-geom_smooth-can-use-all-of-the-lm-methods-without-all-the-work-first.-this-just-means-that-we-wont-have-access-to-them." class="level2">
+<h2 class="anchored" data-anchor-id="have-a-look-at-this.-note-that-geom_smooth-can-use-all-of-the-lm-methods-without-all-the-work-first.-this-just-means-that-we-wont-have-access-to-them.">Have a look at this. Note that geom_smooth can use all of the lm methods without all the work first. This just means that we won’t have access to them.</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>health_rank_pred <span class="ot">&lt;-</span> <span class="fu">fitted</span>(livenv_logmodel)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>health_rank_pred <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(health_rank_pred)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>health_rank_pred<span class="sc">$</span>residuals <span class="ot">&lt;-</span> <span class="fu">residuals</span>(livenv_logmodel)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>health_rank_pred<span class="sc">$</span>livenv_rank <span class="ot">&lt;-</span> london_data<span class="sc">$</span>livingEnv_london_rank</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>health_rank_pred<span class="sc">$</span>health_rank_raw <span class="ot">&lt;-</span> london_data<span class="sc">$</span>health_london_rank</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(health_rank_pred)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  health_rank_pred  residuals livenv_rank health_rank_raw
+1         20346.79 11766.2064        7789           32113
+2         21278.36  8426.6360       13070           29705
+3         19188.32 -1588.3242        4092           17600
+4         20684.57 -2777.5697        9397           17907
+5         20906.29   674.7073       10629           21581
+6         20994.35 -4580.3534       11162           16414</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>plot1 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(health_rank_pred, <span class="fu">aes</span>(<span class="fu">log</span>(livenv_rank), health_rank_raw)) <span class="sc">+</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.3</span>) <span class="sc">+</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="co">#geom_line(aes(log(livenv_rank), health_rank_pred), color = "blue")</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="robust-regression" class="level2">
+<h2 class="anchored" data-anchor-id="robust-regression">Robust regression</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sandwich)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'sandwich' was built under R version 4.3.3</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(olsrr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'olsrr' was built under R version 4.3.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'olsrr'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:datasets':
+
+    rivers</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lmtest)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'lmtest' was built under R version 4.3.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: zoo</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'zoo' was built under R version 4.3.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'zoo'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:base':
+
+    as.Date, as.Date.numeric</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>livenv_health_model<span class="sc">$</span>robse <span class="ot">&lt;-</span> <span class="fu">vcovHC</span>(livenv_health_model, <span class="at">type =</span> <span class="st">"HC1"</span>)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coeftest</span>(livenv_health_model, livenv_health_model<span class="sc">$</span>robse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+t test of coefficients:
+
+                        Estimate Std. Error t value  Pr(&gt;|t|)    
+(Intercept)           1.6916e+04 2.2480e+02  75.249 &lt; 2.2e-16 ***
+livingEnv_london_rank 3.4304e-01 1.8640e-02  18.404 &lt; 2.2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ols_test_normality</span>(livenv_health_model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in ks.test.default(y, "pnorm", mean(y), sd(y)): ties should not be
+present for the Kolmogorov-Smirnov test</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>-----------------------------------------------
+       Test             Statistic       pvalue  
+-----------------------------------------------
+Shapiro-Wilk              0.9804         0.0000 
+Kolmogorov-Smirnov        0.055          0.0000 
+Cramer-von Mises         405.6282        0.0000 
+Anderson-Darling         27.0947         0.0000 
+-----------------------------------------------</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Residual vs. fitted values</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ols_plot_resid_fit</span>(livenv_health_model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="13_regression_qmd_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ols_plot_resid_hist</span>(livenv_health_model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="13_regression_qmd_files/figure-html/unnamed-chunk-8-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="broom" class="level2">
+<h2 class="anchored" data-anchor-id="broom">Broom</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(livenv_health_model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = health_london_rank ~ livingEnv_london_rank, data = london_data)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-21549.6  -5948.2    609.1   6239.2  15792.2 
+
+Coefficients:
+                       Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)           1.692e+04  2.274e+02   74.40   &lt;2e-16 ***
+livingEnv_london_rank 3.430e-01  1.915e-02   17.91   &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 7625 on 4833 degrees of freedom
+Multiple R-squared:  0.06225,   Adjusted R-squared:  0.06205 
+F-statistic: 320.8 on 1 and 4833 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(broom)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>tidytable <span class="ot">&lt;-</span> <span class="fu">tidy</span>(livenv_health_model)</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>tidytable</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 5
+  term                   estimate std.error statistic  p.value
+  &lt;chr&gt;                     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+1 (Intercept)           16916.     227.          74.4 0       
+2 livingEnv_london_rank     0.343    0.0192      17.9 1.63e-69</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>tidytable[<span class="dv">2</span>,<span class="st">"p.value"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 1
+   p.value
+     &lt;dbl&gt;
+1 1.63e-69</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">augment</span>(livenv_health_model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 4,835 × 8
+   health_london_rank livingEnv_london_rank .fitted  .resid     .hat .sigma
+                &lt;int&gt;                 &lt;int&gt;   &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt;
+ 1              32113                  7789  19588.  12525. 0.000250  7624.
+ 2              29705                 13070  21400.   8305. 0.000252  7625.
+ 3              17600                  4092  18320.   -720. 0.000458  7626.
+ 4              17907                  9397  20140.  -2233. 0.000213  7626.
+ 5              21581                 10629  20562.   1019. 0.000207  7626.
+ 6              16414                 11162  20745.  -4331. 0.000210  7626.
+ 7              12334                  8672  19891.  -7557. 0.000226  7625.
+ 8               9661                  9611  20213. -10552. 0.000211  7625.
+ 9              16050                  2269  17694.  -1644. 0.000624  7626.
+10              18178                  4309  18394.   -216. 0.000441  7626.
+# ℹ 4,825 more rows
+# ℹ 2 more variables: .cooksd &lt;dbl&gt;, .std.resid &lt;dbl&gt;</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glance</span>(livenv_health_model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 12
+  r.squared adj.r.squared sigma statistic  p.value    df  logLik     AIC     BIC
+      &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;
+1    0.0622        0.0621 7625.      321. 1.63e-69     1 -50081. 100167. 100187.
+# ℹ 3 more variables: deviance &lt;dbl&gt;, df.residual &lt;int&gt;, nobs &lt;int&gt;</code></pre>
+</div>
+</div>
+</section>
 </section>
 
 </main>

@@ -1,0 +1,51 @@
+## Afternoon challenge
+
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+gap <- read.csv("data/gapminder_data.csv")
+gap <- gap |> 
+  filter(year == 2002)
+```
+
+
+```{r}
+new_model <- lm(lifeExp ~ log(gdpPercap), gap)
+summary(new_model)
+```
+
+
+```{r}
+new_plot <- gap |> 
+  ggplot(aes(log(gdpPercap), lifeExp)) +
+  geom_point() +
+  geom_smooth(method = lm)
+new_plot
+```
+
+
+```{r}
+library(sandwich)
+library(olsrr)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
