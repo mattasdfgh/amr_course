@@ -70,7 +70,6 @@ xtabs(~organism, data = amr)
 
 ```{r}
 amr_xtab <- xtabs(~ coamox + cipro + gentam, data = amr)
-amr_xtab
 View(amr_xtab)
 
 amr_xtab <- as.data.frame(amr_xtab)
@@ -94,7 +93,6 @@ logit.use
 ## Now let's see if resistance odds differ by age
 
 linearity.data <- data.frame(logit.use, age = coamox_logi$model$age_years_sd)
-linearity.data
 
 ## Create a plot with linear and actual relationship
 linear_plot <- linearity.data |> 
@@ -105,16 +103,161 @@ linear_plot <- linearity.data |>
   labs(x = "Age", y = "Log odds of resistance to coamoxiclav")
 
 linear_plot
-
 ```
 
 
-## Using plain English reporting 
+## Using plain English reporting (sometimes useful, maybe not often)
 
 ```{r}
 library(report)
-report(coamox_logi)
+#report(coamox_logi)
 ```
+
+
+## Challenge
+
+```{r}
+coamox_surg_logit <- glm(coamox ~ age_years_sd + sex_male
+                         + had_surgery_past_yr, data = amr,
+                         family = "binomial")
+
+tidy(coamox_surg_logit)
+car::vif(coamox_surg_logit)
+
+```
+
+
+
+## Include reporting for all regions
+
+```{r}
+coamox_reg_logit <- glm(coamox ~  age_years_sd + sex_male + region,
+                        data = amr,
+                        family = "binomial")
+
+summary(coamox_reg_logit)
+
+```
+
+
+```{r}
+library(aod)
+waldtest(b = coef(coamox_reg_logit),
+         Sigma = vcov(coamox_reg_logit), Terms = 3: 11)
+
+```
+
+
+## Another challenge, basically just demonstrating that we can include as.factor in the code. This is similar to using i. in STATA (I think lol). 
+
+```{r}
+coamox_imd_surg_logit <- glm(coamox ~ age_years_sd + sex_male
+                         + had_surgery_past_yr +  0 + as.factor(imd), data = amr,
+                         family = "binomial")
+
+summary(coamox_imd_surg_logit)
+tidy(coamox_imd_surg_logit)
+car::vif(coamox_imd_surg_logit)
+
+## Big change to interpretation depending on whether or not we include the intercept.
+```
+
+
+## Some more stuff (CI for region model)
+
+```{r}
+summary(coamox_reg_logit)
+
+## This one takes ages to run
+#confint(coamox_reg_logit)
+
+## Using standard errors (don't know what this means lol)
+confint.default(coamox_reg_logit)
+
+## Odds ratios only (THIS IS THE USEFUL BIT)
+exp(coef(coamox_reg_logit))
+
+## tidy function gives log odds as default
+tidy(coamox_reg_logit)
+
+## but we can do this with actual odds:
+tidy(coamox_reg_logit, exp = TRUE)
+
+
+## If we run this with and without the '+ 0' in the model, we get different estimates, but we also change whether the estimates are sensible. Including the 0 means that OR estimates are meaningless for that variable (I think lol). 
+```
+
+
+```{r}
+library(odds.n.ends)
+```
+
+
+```{r}
+coamox_reg_logit_OR <- odds.n.ends(coamox_reg_logit)
+coamox_reg_logit_OR$'Predictor odds ratios and 95% CI'
+
+#model fit
+coamox_reg_logit_OR$'Count R-squared (model fit): percent correctly predicted'
+
+#other model statistics
+odds.n.ends(coamox_reg_logit)
+
+
+```
+
+
+
+```{r}
+# Another challenge
+gent_logit <- glm(gentam ~ age_years_sd + sex_male,
+                         data = amr,
+                         family = "binomial")
+
+tidy(gent_logit)
+car::vif(gent_logit)
+summary(gent_logit)
+
+tidy(gent_logit, exp = TRUE)
+
+## Age and sex are definitely relevant
+
+```
+
+
+```{r}
+# Add surgery
+gent_surg_logit <- glm(gentam ~ age_years_sd + sex_male
+                         + had_surgery_past_yr, data = amr,
+                         family = "binomial")
+
+tidy(gent_surg_logit, exp = TRUE)
+```
+
+
+```{r}
+# Add imd
+gent_surg_imd_logit <- glm(gentam ~ age_years_sd + sex_male
+                         + had_surgery_past_yr +  as.factor(imd), data = amr,
+                         family = "binomial")
+
+tidy(gent_surg_imd_logit, exp = TRUE)
+
+```
+
+
+```{r}
+# Add ethnicity
+gent_surg_imd_eth_logit <- glm(gentam ~ age_years_sd + sex_male
+                         + had_surgery_past_yr +  as.factor(imd) + 0 + ethnicity, data = amr,
+                         family = "binomial")
+
+tidy(gent_surg_imd_eth_logit, exp = TRUE)
+
+## I cannot make all of the ethnicity groups show up, kinda strange.
+```
+
+
 
 
 

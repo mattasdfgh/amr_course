@@ -1,0 +1,228 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+# Databases
+
+```{r}
+library(DBI)
+library(RSQLite)
+```
+
+
+```{r}
+ahah <- read.csv("data/AHAH_V3_0.csv")
+imd <- read.csv("data/uk_imd2019.csv")
+```
+
+
+## Connecting to SQLite
+
+```{r}
+cdrcDB <- dbConnect(RSQLite::SQLite(), "cdrcDB.sqlite")
+cdrcDB
+```
+
+
+## Let's make some tables
+
+```{r}
+dbWriteTable(cdrcDB, "ahah", ahah, overwrite = TRUE)
+dbWriteTable(cdrcDB, "imd", imd, overwrite = TRUE)
+
+dbListTables(cdrcDB)
+
+## Looking at fields, it seems as though we can't do 2 tables at a time, unless there is a special option.
+dbListFields(cdrcDB, "imd")
+
+
+```
+
+
+## Now we can query some stuff
+
+```{r}
+# Get first 10 records from LANAME field
+dbGetQuery(cdrcDB, "SELECT LANAME FROM imd LIMIT 10")
+
+# Select all unique LANAMEs
+dbGetQuery(cdrcDB, "SELECT DISTINCT LANAME FROM imd")
+
+# Pulling more than one column
+dbGetQuery(cdrcDB, "SELECT LANAME, Rank FROM imd LIMIT 10")
+
+# Pulling all columns
+dbGetQuery(cdrcDB, "SELECT * FROM imd LIMIT 10")
+
+# Sorting by rank and pulling (ascending is default, can use ASC or DESC to specify)
+dbGetQuery(cdrcDB, "SELECT * FROM imd ORDER BY Rank ASC LIMIT 10")
+dbGetQuery(cdrcDB, "SELECT * FROM imd ORDER BY Rank DESC LIMIT 10")
+
+
+```
+
+
+```{r}
+dbGetQuery(cdrcDB, "SELECT lsoa11, ah3h_rnk, ah3g_rnk, ah3e_rnk FROM ahah ORDER BY ah3h_rnk DESC LIMIT 10")
+
+## It can be nice to break lines (although it does the tabs weird):
+dbGetQuery(cdrcDB, "SELECT lsoa11, ah3h_rnk, ah3g_rnk, ah3e_rnk 
+           FROM ahah 
+           ORDER BY ah3h_rnk DESC 
+           LIMIT 10")
+
+```
+
+
+
+```{r}
+# Learning to filter (note that the = is a single sign, not a ==)
+# The command is WHERE
+
+dbGetQuery(cdrcDB, "SELECT LSOA, LANAME, SOA_decile
+           FROM imd
+           WHERE LANAME = 'City of London'")
+
+dbGetQuery(cdrcDB, "SELECT LSOA, LANAME, SOA_decile
+           FROM imd
+           WHERE SOA_decile < 5 AND LANAME != 'City of London'
+           LIMIT 10")
+
+## Using LIKE. In this example, we are looking for LANAMEs containing 'and'
+dbGetQuery(cdrcDB, "SELECT DISTINCT LANAME
+           FROM imd
+           WHERE LANAME LIKE '%and%'
+           LIMIT 10")
+
+dbGetQuery(cdrcDB, "SELECT DISTINCT LANAME
+           FROM imd
+           WHERE LANAME LIKE '% and %'
+           LIMIT 10")
+
+
+```
+
+
+
+## Note how we can change the chunk to SQL. This will not actually run as SQL code, so we still need to use the R commands. What it will do is highlight certain words so we can see that our commands are working. See below.
+
+```{sql}
+# Learning to filter (note that the = is a single sign, not a ==)
+# The command is WHERE
+
+dbGetQuery(cdrcDB, "SELECT LSOA, LANAME, SOA_decile
+           FROM imd
+           WHERE LANAME = 'City of London'")
+
+dbGetQuery(cdrcDB, "SELECT LSOA, LANAME, SOA_decile
+           FROM imd
+           WHERE SOA_decile < 5 AND LANAME != 'City of London'
+           LIMIT 10")
+
+```
+
+
+
+## A little challenge 
+
+```{r}
+dbGetQuery(cdrcDB, "SELECT lsoa11, ah3h_rnk, ah3g_rnk, ah3e_rnk
+           FROM ahah
+           WHERE ah3h_rnk < 500
+           OR ah3e_rnk BETWEEN 3500 AND 4500
+           ORDER BY ah3e_rnk ASC
+           LIMIT 15")
+
+```
+
+
+## A few more little commands:
+
+```{r}
+# Joining data (1:1)
+
+df1 <- dbGetQuery(cdrcDB, "SELECT lsoa11, LSOA, ah3gp, LANAME
+           FROM ahah
+           JOIN imd
+           ON ahah.lsoa11 = imd.LSOA
+           LIMIT 10")
+
+## There are some other joins as well. Default is probably full join, meaning that it will keep any unmatched records.
+
+```
+
+
+
+## dplyr works with databases. 
+
+```{r}
+library(dplyr)
+```
+
+
+```{r}
+imd_tab <- tbl(cdrcDB, "imd")
+ahah_tab <- tbl(cdrcDB, "ahah")
+
+imd_tab
+ahah_tab
+
+## This is quite cool, it doesn't actually load the data to R but it allows us to play with the data as though it is in R. 
+
+imd_tab |> 
+  select(LANAME) |> 
+  filter(LANAME == "City of London")
+  head(10) #|> 
+  # show_query() # I am not sure what show_query is doing
+  
+## We cannot use base code here. It seems as though we can use any tidyverse stuff.
+  
+library(ggplot2)
+ggplot(imd_tab, aes(SOA_pct, SOA_decile)) +
+        geom_point()
+
+
+###
+
+df2 <- ahah_tab |> 
+  left_join(imd_tab, by = join_by(lsoa11 == LSOA)) |> 
+  select(lsoa11, ah3gp, Rank, )
+
+
+## Weird how sometimes it is a list and sometimes it is a data frame
+
+```
+
+
+
+## Examples of joining
+
+```{r}
+
+band_members
+
+band_instruments
+
+band_instruments2
+
+band_members |> left_join(band_instruments)
+
+band_members |> right_join(band_instruments)
+
+band_members |> inner_join(band_instruments)
+
+band_members |> full_join(band_instruments)
+
+```
+
+
+
+
+
+
+
+
+
+
+
