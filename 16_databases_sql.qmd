@@ -221,8 +221,3 @@ band_members |> full_join(band_instruments)
 
 
 
-
-
-
-
-

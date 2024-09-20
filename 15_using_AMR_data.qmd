@@ -102,7 +102,6 @@ linear_plot <- linearity.data |>
   geom_smooth(method = lm, se = FALSE, aes(color = "linear")) +
   labs(x = "Age", y = "Log odds of resistance to coamoxiclav")
 
-linear_plot
 ```
 
 
